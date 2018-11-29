@@ -9,6 +9,7 @@ import (
 	"github.com/BurntSushi/toml"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -39,17 +40,14 @@ func init(){
 	dbConn = dbStore{db: db}
 
 }
+
 func main() {
-
-
-	fmt.Println(db)
 
 	router := mux.NewRouter()
 	router.HandleFunc("/forders/index", dbConn.Index).Methods("GET")
-	//router.HandleFunc("/people/{id}", GetPerson).Methods("GET")
 	router.HandleFunc("/forders/create", dbConn.Create).Methods("POST")
-	//router.HandleFunc("/people/{id}", DeletePerson).Methods("DELETE")
 	http.ListenAndServe(":8060", router)
+
 	defer db.Close()
 
 }
@@ -67,16 +65,30 @@ func (conn *dbStore) Index(w http.ResponseWriter, r *http.Request){
 
 }
 
-func (conn *dbStore) Create(w http.ResponseWriter, r *http.Request){
-fmt.Println("aaa")
-fmt.Println(conn.db)
-/*rows, err := db.db.Query("select id,user_id from f_orders")
+func (conn *dbStore) Create(w http.ResponseWriter, req *http.Request){
 
-if err != nil {
-	log.Fatal(err)
-}
+	body, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		panic(err)
+	}
 
-fmt.Println(rows)*/
+	fo := model.FOrder{}
+
+	err = json.Unmarshal(body, &fo)
+	if err != nil {
+		panic(err)
+	}
+
+	err = processor.Create(conn.db,fo)
+
+	if err != nil {
+		panic(err)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	res := model.TemplateResponse{"Successfully saved item"}
+	json.NewEncoder(w).Encode(res)
+
 }
 
 

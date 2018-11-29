@@ -12,4 +12,7 @@ type FOrder struct {
 	Updated_at string
 }
 
-
+type TemplateResponse struct {
+	Message string
+	//Error   error
+}
