@@ -3,9 +3,10 @@ package processor
 import (
 	"database/sql"
 	"forder_confirmer/model"
+	"strconv"
 )
 
-func Index(db *sql.DB) ([]model.FOrderR,error) {
+func Index(db *sql.DB,id string) ([]model.FOrderR,error) {
 
 	rows, err := db.Query("SELECT fo.id,fo.order_id,fo.final_price,fo.created_at,fo.status,u.id,u.email,u.password,u.role_id,u.created_at,u.updated_at,p.id,p.name FROM f_orders as fo inner join users as u on fo.user_id = u.id inner join payments as p on fo.payment_id = p.id;")
 
@@ -25,6 +26,25 @@ func Index(db *sql.DB) ([]model.FOrderR,error) {
 			}
 
 			orders = append(orders, or)
+		}
+
+		if len(id) > 0 {
+
+			id, err := strconv.ParseInt(id, 10, 64)
+			if err != nil {
+				return nil,err
+			}
+
+			for _, order := range orders {
+				if order.ID == id {
+					orders = orders[:0]
+					orders = append(orders, order)
+					break
+				} else {
+					orders = orders[:0]
+				}
+			}
+
 		}
 
 		return orders,nil

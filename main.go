@@ -44,7 +44,7 @@ func init(){
 func main() {
 
 	router := mux.NewRouter()
-	router.HandleFunc("/forders/index", dbConn.Index).Methods("GET")
+	router.HandleFunc("/forders/index/", dbConn.Index).Methods("GET")
 	router.HandleFunc("/forders/create", dbConn.Create).Methods("POST")
 	http.ListenAndServe(":8060", router)
 
@@ -54,7 +54,7 @@ func main() {
 
 func (conn *dbStore) Index(w http.ResponseWriter, r *http.Request){
 
-	orders,err := processor.Index(conn.db)
+	orders,err := processor.Index(conn.db,r.URL.Query().Get("id"))
 
     if err != nil {
    		panic(err)
