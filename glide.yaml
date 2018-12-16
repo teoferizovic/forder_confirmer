@@ -6,3 +6,5 @@ import:
   version: v1.4.1
 - package: github.com/gorilla/mux
   version: v1.6.2
+- package: github.com/go-redis/redis
+  version: v6.14.2

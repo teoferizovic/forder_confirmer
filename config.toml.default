@@ -5,5 +5,9 @@ host = "localhost"
 port = "3306"
 username = "root"
 password = "root"
+redisHost = "localhost"
+redisPort = "6379"
+redisDB = 0
+redisPassword = ""
 
 #https://jonathanmh.com/golang-toml-configs-example-mysql-connection/
