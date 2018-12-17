@@ -24,6 +24,7 @@ type dbStore struct {
 
 var dbConn dbStore
 
+
 func init(){
 
 	//load config file
@@ -47,7 +48,7 @@ func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/forders/index/", dbConn.Index).Methods("GET")
 	router.HandleFunc("/forders/create", dbConn.Create).Methods("POST")
-	router.Use(middleware.AuthenticationMiddleware)
+	router.Use(middleware.AuthenticationMiddleware,middleware.RecoverFromPanic)
 	http.ListenAndServe(":8060", router)
 
 	defer db.Close()
