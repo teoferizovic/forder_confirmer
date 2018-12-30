@@ -8,6 +8,7 @@ import (
 	"forder_confirmer/model"
 	"forder_confirmer/processor"
 	"github.com/BurntSushi/toml"
+	"github.com/go-redis/redis"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
 	"io/ioutil"
@@ -20,10 +21,10 @@ var err error
 
 type dbStore struct {
 	db *sql.DB
+	client *redis.Client
 }
 
 var dbConn dbStore
-
 
 func init(){
 
@@ -39,7 +40,16 @@ func init(){
 		panic(err.Error())
 	}
 
-	dbConn = dbStore{db: db}
+	client := redis.NewClient(&redis.Options{
+		Addr:     conf.RedisHost+":"+conf.RedisPort,
+		Password: conf.RedisPassword,
+		DB:       2,  // use default DB
+	})
+
+	pong, err := client.Ping().Result()
+	fmt.Println(pong, err)
+
+	dbConn = dbStore{db: db,client:client}
 
 }
 
@@ -48,7 +58,7 @@ func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/forders/index/", dbConn.Index).Methods("GET")
 	router.HandleFunc("/forders/create", dbConn.Create).Methods("POST")
-	router.Use(middleware.AuthenticationMiddleware,middleware.RecoverFromPanic)
+	router.Use(middleware.AuthenticationMiddleware,middleware.RecoverFromPanic,middleware.Logger)
 	http.ListenAndServe(":8060", router)
 
 	defer db.Close()
@@ -57,7 +67,7 @@ func main() {
 
 func (conn *dbStore) Index(w http.ResponseWriter, r *http.Request){
 
-	orders,err := processor.Index(conn.db,r.URL.Query().Get("id"))
+	orders,err := processor.Index(conn.db,conn.client,r.URL.Query().Get("id"),r.URL.String())
 
     if err != nil {
    		panic(err)
