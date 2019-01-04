@@ -65,6 +65,10 @@ func Index(db *sql.DB,client *redis.Client,id string,url string) ([]model.FOrder
 
 func Create(db *sql.DB,order model.FOrder) error {
 
+	if validErrs := order.Validate();validErrs!=nil {
+		return validErrs
+	}
+
 	insert, err := db.Prepare("INSERT INTO f_orders(user_id, order_id,payment_id,status,final_price,created_at) VALUES(?,?,?,?,?,?)")
 
 	if err != nil {

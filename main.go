@@ -74,6 +74,7 @@ func (conn *dbStore) Index(w http.ResponseWriter, r *http.Request){
     }
 
  	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
  	json.NewEncoder(w).Encode(orders)
 
 }
@@ -95,10 +96,14 @@ func (conn *dbStore) Create(w http.ResponseWriter, req *http.Request){
 	err = processor.Create(conn.db,fo)
 
 	if err != nil {
-		panic(err)
+		w.Header().Set("Content-type", "applciation/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{"Error:": err.Error()})
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
 	res := model.TemplateResponse{"Successfully saved item"}
 	json.NewEncoder(w).Encode(res)
 
