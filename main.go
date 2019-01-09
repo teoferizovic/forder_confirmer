@@ -58,7 +58,7 @@ func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/forders/index/", dbConn.Index).Methods("GET")
 	router.HandleFunc("/forders/create", dbConn.Create).Methods("POST")
-	router.Use(middleware.AuthenticationMiddleware,middleware.RecoverFromPanic,middleware.Logger)
+	router.Use(middleware.AuthenticationMiddleware,middleware.RecoverFromPanic,middleware.Logger,middleware.CacheMiddleware)
 	http.ListenAndServe(":8060", router)
 
 	defer db.Close()

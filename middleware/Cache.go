@@ -1,6 +1,10 @@
 package middleware
 
 import (
+	"encoding/json"
+	"fmt"
+	"forder_confirmer/model"
+	"github.com/BurntSushi/toml"
 	"github.com/go-redis/redis"
 	"net/http"
 )
@@ -9,7 +13,7 @@ type redisStore2 struct {
 	client *redis.Client
 }
 
-/*var conff model.Config
+var conff model.Config
 var redisConn2 redisStore2
 
 func init(){
@@ -27,32 +31,34 @@ func init(){
 	pong, err := client.Ping().Result()
 	fmt.Println(pong, err)
 	redisConn2 = redisStore2{client:client}
-}*/
+}
 
 func  CacheMiddleware(next http.Handler) http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		/*datas, err := redisConn2.client.Get(r.URL.String()).Result()
-		fmt.Println(r.URL.String())
+		datas, err := redisConn2.client.Get(r.URL.String()).Result()
+
 		if err != nil {
 			next.ServeHTTP(w, r)
 			fmt.Println("aaaa")
 		} else {
 			fmt.Println("bbbb")
-			//fmt.Println(datas)
-			/*bytes := []byte(datas)
-			var ps []model.FOrder{}
+			bytes := []byte(datas)
 
-			err = json.Unmarshal(bytes, &ps)
+			var orders []model.FOrderR
+
+			err = json.Unmarshal(bytes, &orders)
 			if err != nil {
 				fmt.Println(err)
 			}
-			fmt.Println(ps)*/
-			/*w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(datas)
-			next.ServeHTTP(w, r)
-		}*/
+			//fmt.Println(ps)
+			//fmt.Println(datas)
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(orders)
+			//next.ServeHTTP(w, r)
+			return
+		}
 	})
 
 }
