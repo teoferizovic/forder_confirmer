@@ -3,13 +3,13 @@ package processor
 import (
 	"database/sql"
 	"encoding/json"
+	"forder_confirmer/database"
 	"forder_confirmer/model"
-	"github.com/go-redis/redis"
 	"strconv"
 	"time"
 )
 
-func Index(db *sql.DB,client *redis.Client,id string,url string) ([]model.FOrderR,error) {
+func Index(db *sql.DB,id string,url string) ([]model.FOrderR,error) {
 
 	rows, err := db.Query("SELECT fo.id,fo.order_id,fo.final_price,fo.created_at,fo.status,u.id,u.email,u.password,u.role_id,u.created_at,u.updated_at,p.id,p.name FROM f_orders as fo inner join users as u on fo.user_id = u.id inner join payments as p on fo.payment_id = p.id;")
 
@@ -50,11 +50,10 @@ func Index(db *sql.DB,client *redis.Client,id string,url string) ([]model.FOrder
 
 		}
 
-
 		orderBytes, _ := json.Marshal(orders)
 
 		//set route in cache with 10 second of expiration
-		err = client.Set(url, string(orderBytes), 160*time.Second).Err()
+		err = database.RedisConn2().Set(url, string(orderBytes), 160*time.Second).Err()
 		if err != nil {
 			return nil,err
 		}

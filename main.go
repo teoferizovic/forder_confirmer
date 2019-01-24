@@ -67,7 +67,7 @@ func main() {
 
 func (conn *dbStore) Index(w http.ResponseWriter, r *http.Request){
 
-	orders,err := processor.Index(conn.db,conn.client,r.URL.Query().Get("id"),r.URL.String())
+	orders,err := processor.Index(conn.db,r.URL.Query().Get("id"),r.URL.String())
 
     if err != nil {
    		panic(err)
