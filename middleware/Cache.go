@@ -13,7 +13,7 @@ func  CacheMiddleware(next http.Handler) http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		if r.Method=="GET" {
+		if r.Method == http.MethodGet {
 			datas, err := database.RedisConn2().Get(r.URL.String()).Result()
 
 			if err != nil {
