@@ -57,6 +57,7 @@ func main() {
 
 	router := mux.NewRouter()
 	router.HandleFunc("/forders/index/", dbConn.Index).Methods("GET")
+	router.HandleFunc("/orders/index/", dbConn.IndexO).Methods("GET")
 	router.HandleFunc("/forders/create", dbConn.Create).Methods("POST")
 	router.Use(middleware.AuthenticationMiddleware,middleware.RecoverFromPanic,middleware.Logger,middleware.CacheMiddleware)
 	http.ListenAndServe(":8060", router)
@@ -76,6 +77,20 @@ func (conn *dbStore) Index(w http.ResponseWriter, r *http.Request){
  	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
  	json.NewEncoder(w).Encode(orders)
+
+}
+
+func (conn *dbStore) IndexO(w http.ResponseWriter, r *http.Request){
+
+	orders,err := processor.IndexO(conn.db,r.URL.Query().Get("id"),r.URL.String())
+
+	if err != nil {
+		panic(err)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(orders)
 
 }
 
