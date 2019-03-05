@@ -1,15 +1,15 @@
 package processor
 
 import (
-	"database/sql"
 	"encoding/json"
 	"forder_confirmer/database"
 	"forder_confirmer/model"
 	"forder_confirmer/storage"
+	"github.com/jinzhu/gorm"
 	"time"
 )
 
-func Index(db *sql.DB,id string,url string) ([]model.FOrderR,error) {
+func Index(db *gorm.DB,id string,url string) ([]model.FOrder,error) {
 
 		orders, err := storage.GetAllFOrders(db,id,url)
 
@@ -19,7 +19,7 @@ func Index(db *sql.DB,id string,url string) ([]model.FOrderR,error) {
 
 		orderBytes, _ := json.Marshal(orders)
 
-		//set route in cache with 10 second of expiration
+		//set route in cache with 160 second of expiration
 		err = database.RedisConn2().Set(url, string(orderBytes), 160*time.Second).Err()
 		if err != nil {
 			return nil,err
@@ -29,7 +29,7 @@ func Index(db *sql.DB,id string,url string) ([]model.FOrderR,error) {
 
 }
 
-func Create(db *sql.DB,order model.FOrder) error {
+func Create(db *gorm.DB,order model.FOrder) error {
 
 		if validErrs := order.Validate();validErrs!=nil {
 			return validErrs
@@ -41,12 +41,13 @@ func Create(db *sql.DB,order model.FOrder) error {
 			return err
 		}
 
+		//clear redis cache by route
 		database.RedisConn2().FlushDb()
 
 		return nil
 }
 
-func IndexO(db *sql.DB,id string,url string) ([]model.Order,error) {
+func IndexO(db *gorm.DB,id string,url string) ([]model.Order,error) {
 
 		orders, err := storage.GetAllOrders(db)
 
@@ -56,7 +57,7 @@ func IndexO(db *sql.DB,id string,url string) ([]model.Order,error) {
 
 		orderBytes, _ := json.Marshal(orders)
 
-		//set route in cache with 10 second of expiration
+		//set route in cache with 160 second of expiration
 		err = database.RedisConn2().Set(url, string(orderBytes), 160*time.Second).Err()
 		if err != nil {
 			return nil,err

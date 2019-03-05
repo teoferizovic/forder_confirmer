@@ -1,30 +1,14 @@
 package storage
 
-import ("database/sql"
+import (
 	"forder_confirmer/model"
+	"github.com/jinzhu/gorm"
 )
 
-func GetAllOrders(db *sql.DB) ([]model.Order,error) {
-
-	rows, err := db.Query("SELECT o.id,COALESCE(deleted_at, ''),u.email as deleted_at from orders as o inner join users as u on u.id=o.user_id")
-
-	if err != nil {
-		return nil,err
-	}
+func GetAllOrders(db *gorm.DB) ([]model.Order,error) {
 
 	orders := []model.Order{}
-
-	for rows.Next() {
-
-		var o model.Order
-		err = rows.Scan(&o.ID,&o.Deleted_at,&o.User.Email)
-
-		if err != nil {
-			return nil,err
-		}
-
-		orders = append(orders, o)
-	}
+	db.Find(&orders)
 
 	return orders,nil
 }

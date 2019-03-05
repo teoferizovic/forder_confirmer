@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"forder_confirmer/middleware"
@@ -9,18 +8,21 @@ import (
 	"forder_confirmer/processor"
 	"github.com/BurntSushi/toml"
 	"github.com/go-redis/redis"
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/gorilla/mux"
+	"github.com/jinzhu/gorm"
 	"io/ioutil"
+
+	//_ "github.com/go-sql-driver/mysql"
+	"github.com/gorilla/mux"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"net/http"
 )
 
 var conf model.Config
-var db *sql.DB
+var db *gorm.DB
 var err error
 
 type dbStore struct {
-	db *sql.DB
+	db *gorm.DB
 	client *redis.Client
 }
 
@@ -34,11 +36,13 @@ func init(){
 	}
 
 	//open db connection
-	db, err = sql.Open("mysql", conf.Username+":"+conf.Password+"@tcp("+conf.Host+":"+conf.Port+")/"+conf.DB)
+	db, err := gorm.Open("mysql", conf.Username+":"+conf.Password+"@/"+conf.DB+"?charset=utf8&parseTime=True&loc=Local")
 
 	if err != nil {
 		panic(err.Error())
 	}
+
+	//defer db.Close()
 
 	client := redis.NewClient(&redis.Options{
 		Addr:     conf.RedisHost+":"+conf.RedisPort,

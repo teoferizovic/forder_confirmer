@@ -1,32 +1,16 @@
 package storage
 
 import (
-	"database/sql"
 	"forder_confirmer/model"
+	"github.com/jinzhu/gorm"
 	"strconv"
 )
 
-func GetAllFOrders(db *sql.DB,id string,url string) ([]model.FOrderR,error) {
+func GetAllFOrders(db *gorm.DB,id string,url string) ([]model.FOrder,error) {
 
-	rows, err := db.Query("SELECT fo.id,fo.order_id,fo.final_price,fo.created_at,fo.status,u.id,u.email,u.password,u.role_id,u.created_at,u.updated_at,p.id,p.name FROM f_orders as fo inner join users as u on fo.user_id = u.id inner join payments as p on fo.payment_id = p.id;")
-
-	if err != nil {
-		return nil, err
-	}
-
-	orders := []model.FOrderR{}
-
-	for rows.Next() {
-
-		var or model.FOrderR
-		err = rows.Scan(&or.ID, &or.Order_id, &or.Final_price, &or.Created_at, &or.Status, &or.User.ID, &or.User.Email, &or.User.Password, &or.User.Role_id, &or.User.Created_at, &or.User.Updated_at, &or.Payment.ID, &or.Payment.Name)
-
-		if err != nil {
-			return nil, err
-		}
-
-		orders = append(orders, or)
-	}
+	orders := []model.FOrder{}
+	//user := model.User{}
+	order := model.FOrder{}
 
 	if len(id) > 0 {
 
@@ -35,17 +19,20 @@ func GetAllFOrders(db *sql.DB,id string,url string) ([]model.FOrderR,error) {
 			return nil, err
 		}
 
-		for _, order := range orders {
-			if order.ID == id {
-				orders = orders[:0]
-				orders = append(orders, order)
-				break
-			} else {
-				orders = orders[:0]
-			}
+
+
+		if err := db.First(&order,id).Error; gorm.IsRecordNotFoundError(err) {
+			return orders,nil
 		}
 
+		orders = append(orders,order)
+		return orders,nil
 	}
 
+
+	//db.Model(&orders).Related(&user,"User")
+	//db.Model(&order).Association("Users").Find(&order.User)
+	db.Find(&orders)
 	return orders,nil
+
 }

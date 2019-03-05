@@ -8,3 +8,6 @@ import:
   version: v1.6.2
 - package: github.com/go-redis/redis
   version: v6.14.2
+- package: github.com/jinzhu/gorm
+  version: v1.9.2
+- package: github.com/jinzhu/inflection
