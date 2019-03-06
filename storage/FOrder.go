@@ -7,7 +7,10 @@ import (
 
 func Create(db *gorm.DB,order model.FOrder) error {
 
-	db.Create(&order)
+	if err := db.Create(&order).Error; err != nil {
+		return err
+	}
+
 	return nil
 
 }
