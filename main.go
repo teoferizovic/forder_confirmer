@@ -112,7 +112,7 @@ func (conn *dbStore) Create(w http.ResponseWriter, req *http.Request){
 		panic(err)
 	}
 
-	err = processor.Create(conn.db,fo)
+	err = processor.Create(conn.db,fo,conf)
 
 	if err != nil {
 		w.Header().Set("Content-type", "applciation/json")

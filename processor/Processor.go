@@ -29,7 +29,7 @@ func Index(db *gorm.DB,id string,url string) ([]model.FOrder,error) {
 
 }
 
-func Create(db *gorm.DB,order model.FOrder) error {
+func Create(db *gorm.DB,order model.FOrder,conf model.Config) error {
 
 		if validErrs := order.Validate();validErrs!=nil {
 			return validErrs
@@ -40,6 +40,9 @@ func Create(db *gorm.DB,order model.FOrder) error {
 		if err != nil{
 			return err
 		}
+
+		//publish to Redis channel to comunicate with other Go microservice
+		database.RedisConn2().Publish(conf.RedisChannel,"Successfuly saved order.")
 
 		//clear redis cache by route
 		database.RedisConn2().FlushDb()

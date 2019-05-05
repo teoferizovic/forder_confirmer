@@ -10,4 +10,5 @@ type Config struct {
 	RedisPort string
 	RedisDB int
 	RedisPassword string
+	RedisChannel string
 }
